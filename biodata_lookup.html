@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biodata Lookup</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        input, button { padding: 10px; margin: 10px; }
+        #result { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Biodata Lookup</h1>
+    <form id="lookupForm">
+        <label for="forceNumber">Enter Force Number:</label>
+        <input type="text" id="forceNumber" required>
+        <button type="submit">Search</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('lookupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const forceNumber = document.getElementById('forceNumber').value;
+            const apiKey = 'YOUR_API_KEY'; // Replace with your Google Sheets API Key
+            const spreadsheetId = '1MjO1mKwNs5Z021J_Tcn3XzqGyLXNgvxUHxGA6ky7pDo';
+            const range = 'Sheet3';
+
+            fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    const rows = data.values;
+                    const headers = rows[0];
+                    const result = rows.find(row => row[headers.indexOf('FORCE NO')] === forceNumber);
+
+                    if (result) {
+                        let resultHtml = '<h2>Biodata:</h2><ul>';
+                        headers.forEach((header, index) => {
+                            resultHtml += `<li><strong>${header}:</strong> ${result[index]}</li>`;
+                        });
+                        resultHtml += '</ul>';
+                        document.getElementById('result').innerHTML = resultHtml;
+                    } else {
+                        document.getElementById('result').innerHTML = '<p>No data found for this Force Number.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('result').innerHTML = '<p>An error occurred. Please try again later.</p>';
+                });
+        });
+    </script>
+</body>
+</html>
